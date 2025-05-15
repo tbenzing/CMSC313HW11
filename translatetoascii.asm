@@ -27,14 +27,14 @@ convert_loop:
     mov ah, al
     shr ah, 4
     and ah, 0x0F
-    movzx ebx, ah                    ; ← FIXED: extend 8-bit ah to 32-bit ebx
+    movzx ebx, ah                    
     mov bl, byte [hexDigits + ebx]
     mov [edi], bl
     inc edi
 
     ; Lower nibble
     and al, 0x0F
-    movzx ebx, al                    ; ← FIXED: extend al to 32-bit ebx
+    movzx ebx, al                    
     mov bl, byte [hexDigits + ebx]
     mov [edi], bl
     inc edi
