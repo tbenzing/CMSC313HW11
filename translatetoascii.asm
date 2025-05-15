@@ -2,7 +2,7 @@ section .data
 inputBuf db 0x83, 0x6A, 0x88, 0xDE, 0x9A, 0xC3, 0x54, 0x9A
 inputLen equ $ - inputBuf
 
-hexDigits db "0123456789ABCDEF", 0
+hexDigits db "0123456789ABCDEF"
 newline db 0x0A
 
 section .bss
@@ -27,13 +27,15 @@ convert_loop:
     mov ah, al
     shr ah, 4
     and ah, 0x0F
-    mov bl, byte [hexDigits + ah]
+    movzx ebx, ah                    ; ← FIXED: extend 8-bit ah to 32-bit ebx
+    mov bl, byte [hexDigits + ebx]
     mov [edi], bl
     inc edi
 
     ; Lower nibble
     and al, 0x0F
-    mov bl, byte [hexDigits + al]
+    movzx ebx, al                    ; ← FIXED: extend al to 32-bit ebx
+    mov bl, byte [hexDigits + ebx]
     mov [edi], bl
     inc edi
 
@@ -50,11 +52,11 @@ convert_done:
     mov byte [edi], 0x0A   ; newline
 
     ; write syscall: sys_write (eax=4)
-    mov eax, 4
-    mov ebx, 1          ; stdout
-    mov ecx, outputBuf
+    mov eax, 4             ; syscall number for sys_write
+    mov ebx, 1             ; file descriptor: stdout
+    mov ecx, outputBuf     ; pointer to output buffer
     mov edx, edi
-    sub edx, outputBuf  ; length = edi - outputBuf
+    sub edx, outputBuf     ; length = edi - outputBuf
     int 0x80
 
     ; exit syscall: sys_exit (eax=1)
