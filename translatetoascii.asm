@@ -12,34 +12,37 @@ section .text
 global _start
 
 _start:
-    mov esi, inputBuf     ; Source pointer to inputBuf
-    mov edi, outputBuf    ; Destination pointer to outputBuf
-    mov ecx, inputLen     ; Number of bytes to convert
+    mov esi, inputBuf     ; source pointer to inputBuf
+    mov edi, outputBuf    ; destination pointer to outputBuf
+    mov ecx, inputLen     ; number of bytes to convert
+
+;; convert each bypte in inputBuf to its 2digit ascii hex representation
+;; store result in outputBuf, adding a space after each byte
 
 convert_loop:
     cmp ecx, 0
-    je convert_done       ; If done, exit loop
+    je convert_done      ; exit loop once all input bytes are processed 
 
-    ; Load byte from input
+    ;; load one byte from input buffer
     mov al, byte [esi]
 
-    ; Upper nibble
+    ;; isolate and convert the upper nibble to ascii hex
     mov ah, al
-    shr ah, 4
-    and ah, 0x0F
-    movzx ebx, ah
-    mov bl, byte [hexDigits + ebx]
-    mov [edi], bl
+    shr ah, 4             ; shift right to move upper nibble into lower bits
+    and ah, 0x0F          ; mask to ensure only 4 bits remain
+    movzx ebx, ah         ; zero-extend to safely use as index
+    mov bl, byte [hexDigits + ebx] ; look up ascii character
+    mov [edi], bl         ; store ascii character in output buffer
     inc edi
 
-    ; Lower nibble
+    ;; isolate and convert the lower nibble of the byte to ascii hex, same process as upper nibble
     and al, 0x0F
     movzx ebx, al
     mov bl, byte [hexDigits + ebx]
     mov [edi], bl
     inc edi
 
-    ; Add space
+    ;; add space
     mov byte [edi], ' '
     inc edi
 
@@ -48,18 +51,19 @@ convert_loop:
     jmp convert_loop
 
 convert_done:
+    ;; overwrite trailing space with a newline
     mov byte [edi], 0x0A
     inc edi
 
-    ; write syscall: sys_write (eax=4)
-    mov eax, 4             ; syscall number for sys_write
-    mov ebx, 1             ; file descriptor: stdout
-    mov ecx, outputBuf     ; pointer to output buffer
+    ;; write outputBuf to the terminal
+    mov eax, 4             
+    mov ebx, 1             
+    mov ecx, outputBuf     
     mov edx, edi
-    sub edx, outputBuf     ; length = edi - outputBuf
+    sub edx, outputBuf     
     int 0x80
 
-    ; exit syscall: sys_exit (eax=1)
+    ;; exit the program
     mov eax, 1
     xor ebx, ebx
     int 0x80
