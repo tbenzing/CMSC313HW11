@@ -27,14 +27,14 @@ convert_loop:
     mov ah, al
     shr ah, 4
     and ah, 0x0F
-    movzx ebx, ah                    
+    movzx ebx, ah
     mov bl, byte [hexDigits + ebx]
     mov [edi], bl
     inc edi
 
     ; Lower nibble
     and al, 0x0F
-    movzx ebx, al                    
+    movzx ebx, al
     mov bl, byte [hexDigits + ebx]
     mov [edi], bl
     inc edi
@@ -48,8 +48,8 @@ convert_loop:
     jmp convert_loop
 
 convert_done:
-    dec edi
-    mov byte [edi], 0x0A   ; newline
+    mov byte [edi], 0x0A
+    inc edi
 
     ; write syscall: sys_write (eax=4)
     mov eax, 4             ; syscall number for sys_write
